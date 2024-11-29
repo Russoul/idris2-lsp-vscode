@@ -9,7 +9,6 @@
     ["(", ")"]
   ],
   "autoClosingPairs": [
-    // ["{", "}"], // gets in the way of block comments
     ["[", "]"],
     ["(", ")"],
     ["\"", "\""],

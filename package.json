@@ -133,6 +133,11 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
+        },
+        "idris2-lsp.ipkgPath": {
+          "scope": "window",
+          "type": "string",
+          "description": "Path to the ipkg file idris2-lsp shall work with"
         }
       }
     },

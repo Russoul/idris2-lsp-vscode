@@ -64,7 +64,7 @@ export function activate(context: ExtensionContext) {
     showMachineNames: extensionConfig.get("showMachineNames") || false,
     fullNamespace: extensionConfig.get("fullNamespace") || false,
     briefCompletions: extensionConfig.get("briefCompletions") || false,
-    ipkgFile: extensionConfig.get("ipkgFile")
+    ipkgPath: extensionConfig.get("ipkgPath")
   };
   const clientOptions: LanguageClientOptions = {
     documentSelector: [

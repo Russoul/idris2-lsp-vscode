@@ -1,0 +1,48 @@
+{
+  "name": "LambdaMachine",
+  "scopeName": "source.lambdamachine",
+  "fileTypes": ["lm"],
+  "patterns": [
+    {
+      "name": "keyword.control.lm",
+      "match": "\\b(data|type|let|in|case|of|if|then|else|with|do|forall|Pi)\\b"
+    },
+    {
+      "name": "storage.type.lm",
+      "match": "\\b(Type|Set|Prop)\\b"
+    },
+    {
+      "name": "entity.name.type.lm",
+      "match": "\\b([A-Z][a-zA-Z0-9_]*)\\b"
+    },
+    {
+      "name": "variable.parameter.lm",
+      "match": "\\b([a-z][a-zA-Z0-9_]*)\\b"
+    },
+    {
+      "name": "keyword.operator.arrow.lm",
+      "match": "(->|=>|=)"
+    },
+    {
+      "name": "comment.line.double-dash.lm",
+      "match": "--.*$"
+    },
+    {
+      "name": "string.quoted.double.lm",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "match": "\\\\.", "name": "constant.character.escape.lm" }
+      ]
+    },
+    {
+      "name": "constant.numeric.lm",
+      "match": "\\b\\d+\\b"
+    },
+    {
+      "name": "punctuation.separator.colon.lm",
+      "match": ":"
+    }
+  ],
+  "repository": {}
+}

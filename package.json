@@ -1,205 +1,88 @@
 {
-  "name": "idris2-lsp",
-  "description": "Idris2 client for the language server protocol",
-  "author": "Rodrigo B. de Oliveira",
+  "name": "massimult-lsp",
+  "description": "Massimult client for the language server protocol",
+  "author": "Rodrigo B. de Oliveira, Ruslan Feizerakhmanov",
   "license": "MIT",
-  "version": "0.7.2",
-  "icon": "images/idris.png",
+  "version": "0.1.0",
+  "icon": "images/massimult.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bamboo/idris2-lsp-vscode"
+    "url": "https://github.com/russoul/idris2-lsp-vscode"
   },
-  "publisher": "bamboo",
+  "publisher": "russoul",
   "categories": [],
   "keywords": [
-    "idris",
+    "massimult",
     "lsp"
   ],
   "engines": {
     "vscode": "^1.52.0"
   },
   "activationEvents": [
-    "onLanguage:idris",
-    "onLanguage:lidr",
-    "workspaceContains:*.ipkg"
+    "onLanguage:massimult"
   ],
   "main": "./out/main.js",
   "contributes": {
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "idris2-lsp.repl.eval",
-          "when": "editorLangId == idris"
-        },
-        {
-          "command": "idris2-lsp.refineHole",
-          "when": "editorLangId == idris"
-        },
-        {
-          "command": "idris2-lsp.metavars",
-          "when": "editorLangId == idris"
-        }
-      ]
+    "configurationDefaults": {
+      "editor.semanticTokenColorCustomizations": {
+          "enabled": true,
+          "rules": {
+              "constructor:massimult": "#14bd14",
+              "function:massimult": "#f22922",
+              "import:massimult": "#0f7cb7",
+              "keyword:massimult": "#c9d819",
+              "typeconstructor:massimult": "#0d9fd9",
+              "typevar:massimult": "#0fd7e5",
+              "comment:massimult": "#bac0c1",
+              "local:massimult": "#6d6f6f",
+              "hole:massimult": "#b649d7"
+          }
+      }
     },
-    "keybindings": [
-      {
-        "key": "ctrl+shift+alt+enter",
-        "command": "idris2-lsp.repl.eval"
-      }
-    ],
-    "commands": [
-      {
-        "command": "idris2-lsp.repl.eval",
-        "title": "Idris: Evaluate selection",
-        "enablement": "editorLangId == idris",
-        "icon": "$(preview)"
-      },
-      {
-        "command": "idris2-lsp.refineHole",
-        "title": "Idris: Refine hole",
-        "enablement": "editorLangId == idris",
-        "icon": "$(wrench)"
-      },
-      {
-        "command": "idris2-lsp.metavars",
-        "title": "Idris: Show metavariables of current file",
-        "enablement": "editorLangId == idris",
-        "icon": "$(wrench)"
-      }
-    ],
+    "menus": {
+      "commandPalette": []
+    },
+    "keybindings": [],
+    "commands": [],
     "configuration": {
       "type": "object",
-      "title": "Idris2",
+      "title": "Massimult",
       "properties": {
-        "idris2-lsp.path": {
+        "massimult-lsp.path": {
           "type": "string",
-          "default": "idris2-lsp",
-          "description": "Command to start Idris 2 language server process."
+          "default": "massimult-lsp",
+          "description": "Command to start Massimult language server process."
         },
-        "idris2-lsp.loglevel": {
-          "type": "string",
-          "enum": [
-            "debug",
-            "info",
-            "warning",
-            "error",
-            "critical"
-          ],
-          "default": "error",
-          "definition": "The log level of the Server."
-        },
-        "idris2-lsp.logFile": {
+        "massimult-lsp.logFile": {
           "type": "string",
           "default": "stderr",
           "definition": "Absolute location of the log file for the server."
         },
-        "idris2-lsp.longActionTimeout": {
-          "type": "number",
-          "default": 5000,
-          "definition": "Timeout in ms for long actions, e.g. expression search."
-        },
-        "idris2-lsp.maxCodeActionResults": {
-          "type": "number",
-          "default": 5,
-          "definition": "Maximum number of multiple code actions for a single command, e.g. expression search."
-        },
-        "idris2-lsp.showImplicits": {
-          "type": "boolean",
-          "default": false,
-          "definition": "Show implicits in hovers."
-        },
-        "idris2-lsp.showMachineNames": {
-          "type": "boolean",
-          "default": false,
-          "definition": "Show machine names in hovers."
-        },
-        "idris2-lsp.fullNamespace": {
-          "type": "boolean",
-          "default": false,
-          "definition": "Show full namespace in hovers"
-        },
-        "idris2-lsp.briefCompletions": {
-          "type": "boolean",
-          "default": true,
-          "definition": "Insert function name without arguments when completing."
-        },
-        "idris2-lsp.trace.server": {
-          "scope": "window",
+        "massimult-lsp.workspace": {
           "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
-        },
-        "idris2-lsp.ipkgPath": {
-          "scope": "window",
-          "type": "string",
-          "description": "Path to the ipkg file idris2-lsp shall work with"
+          "default": ".",
+          "description": "Folder that contains a subfolder with library code: LambdaM"
         }
       }
     },
     "languages": [
       {
-        "id": "idris",
+        "id": "massimult",
         "aliases": [
-          "Idris",
-          "idris"
+          "massimult",
+          "Massimult"
         ],
         "configuration": "./language-configuration.json",
         "extensions": [
-          ".idr"
-        ]
-      },
-      {
-        "id": "ipkg",
-        "aliases": [
-          "iPKG",
-          "ipkg"
-        ],
-        "extensions": [
-          ".ipkg"
-        ]
-      },
-      {
-        "id": "lidr",
-        "aliases": [
-          "lidr",
-          "Literate Idris",
-          "literate idris"
-        ],
-        "extensions": [
-          ".lidr"
+          ".lm"
         ]
       }
     ],
     "grammars": [
       {
-        "language": "idris",
-        "scopeName": "source.idris",
-        "path": "./syntaxes/idris.tmLanguage.json"
-      },
-      {
-        "language": "ipkg",
-        "scopeName": "source.ipkg",
-        "path": "./syntaxes/ipkg.tmLanguage.json"
-      },
-      {
-        "language": "lidr",
-        "scopeName": "source.idris.literate",
-        "path": "./syntaxes/lidr.tmLanguage.json"
-      },
-      {
-        "path": "./syntaxes/inject.json",
-        "scopeName": "idris.injection",
-        "injectTo": [
-          "text.html.markdown"
-        ],
-        "embeddedLanguages": {
-          "meta.embedded.block.idris": "idris"
-        }
+        "language": "massimult",
+        "scopeName": "source.massimult",
+        "path": "./syntaxes/massimult.tmLanguage.json"
       }
     ]
   },

@@ -27,10 +27,10 @@ import {
 import { Readable } from 'stream';
 import * as process from 'process'
 
-const baseName = 'Idris 2 LSP';
+const baseName = 'Massimult LSP';
 
 export function activate(context: ExtensionContext) {
-  const extensionConfig = workspace.getConfiguration("idris2-lsp");
+  const extensionConfig = workspace.getConfiguration("massimult-lsp");
   const command: string = extensionConfig.get("path") || "";
   const debugChannel = window.createOutputChannel(baseName + ' Server');
   const serverOptions: ServerOptions = () => new Promise<StreamInfo>((resolve, reject) => {
@@ -68,14 +68,12 @@ export function activate(context: ExtensionContext) {
   };
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
-      { scheme: 'file', language: 'idris' },
-      { scheme: 'file', language: 'markdown', pattern: '**/*.{lidr,idr}.md' },
-      { scheme: 'file', language: 'lidr' }
+      { scheme: 'file', language: 'massimult' }
     ],
     initializationOptions: initializationOptions,
   };
   const client = new LanguageClient(
-    'idris2-lsp',
+    'massimult-lsp',
     baseName + ' Client',
     serverOptions,
     clientOptions
@@ -98,179 +96,6 @@ function registerCommandHandlersFor(client: LanguageClient, context: ExtensionCo
     },
     rangeBehavior: DecorationRangeBehavior.ClosedClosed
   });
-
-  context.subscriptions.push(
-    commands.registerTextEditorCommand(
-      'idris2-lsp.repl.eval',
-      (editor: TextEditor, _edit: TextEditorEdit, customCode) => {
-        const code: string = customCode || editor.document.getText(editor.selection);
-        if (code.length == 0) {
-          // clear decorations
-          editor.setDecorations(replDecorationType, []);
-          return;
-        }
-        client
-          .sendRequest("workspace/executeCommand", { command: "repl", arguments: [code] })
-          .then(
-            (res) => {
-              const code = res as string;
-              return {
-                hover: new MarkdownString().appendCodeblock(code, 'idris'),
-                preview: code
-              };
-            },
-            (e) => {
-              const error = `${e}`;
-              return {
-                hover: new MarkdownString().appendText(error),
-                preview: error
-              };
-            }
-          )
-          .then((res) => {
-            console.log(`>${res.preview}<`);
-            editor.setDecorations(
-              replDecorationType,
-              [{
-                range: editor.selection,
-                hoverMessage: res.hover,
-                renderOptions: {
-                  after: {
-                    contentText: ' => ' + inlineReplPreviewFor(res.preview) + ' ',
-                  },
-                }
-              }]
-            );
-          });
-      }
-    )
-  );
-
-  context.subscriptions.push(
-    commands.registerTextEditorCommand(
-      'idris2-lsp.refineHole',
-      (editor: TextEditor, _edit: TextEditorEdit) => {
-        if (editor.document.isDirty) {
-          window.showErrorMessage("Unable to refine with unsaved changes");
-          return;
-        }
-        window.showInputBox({
-          placeHolder: "Refine with",
-        }).then(
-          (hint) => {
-            if (hint) {
-              const range = editor.document.getWordRangeAtPosition(editor.selection.active);
-              const params = {
-                codeAction: {
-                  textDocument: {
-                    uri: editor.document.uri.toString(),
-                  },
-                  range: {
-                    start: range.start,
-                    end: range.end,
-                  },
-                  context: {
-                    diagnostics: [],
-                  },
-                },
-                hint: hint,
-              };
-              client
-                .sendRequest("workspace/executeCommand", { command: "refineHole", arguments: [params] })
-                .then(
-                  (res) => {
-                    const actions = res as CodeAction[];
-
-                    // Currently, if the server encounters an error while trying to refine,
-                    // it just logs the error and responds with an empty list of edits.
-                    // If the server is updated to respond with the errors, this generic error message can be removed.
-                    if (actions.length === 0) {
-                      window.showErrorMessage("Failed to refine");
-                    } else {
-                      const workspaceEdit = new WorkspaceEdit();
-
-                      for (const action of actions) {
-                        if (action.edit) {
-                          for (const uri in action.edit.changes) {
-                            for (const change of action.edit.changes[uri]) {
-                              workspaceEdit.replace(Uri.parse(uri), change.range as Range, change.newText);
-                            }
-                          }
-                        }
-                      }
-
-                      workspace.applyEdit(workspaceEdit).then(
-                        (success) => {
-                          if (!success) {
-                            window.showErrorMessage("Failed to apply edit");
-                          }
-                        },
-                        (e) => window.showErrorMessage(`${e}`),
-                      );
-                    }
-                  },
-                  (e) => window.showErrorMessage(`${e}`),
-                );
-            }
-          }
-        );
-      }
-    )
-  );
-
-  context.subscriptions.push(
-    commands.registerTextEditorCommand(
-      'idris2-lsp.metavars',
-      async (editor: TextEditor, _edit: TextEditorEdit) => {
-        try {
-          const result = await client.sendRequest("workspace/executeCommand", { command: "metavars" });
-
-          if (!Array.isArray(result) || result.length === 0) {
-            window.showInformationMessage('No metavars in context');
-            return;
-          }
-
-          const items = result.map(metavar => ({
-            label: `${metavar.name} : ${metavar.type}`,
-            metavar: metavar
-          }));
-
-          const selected = await window.showQuickPick(items, {
-            placeHolder: 'Select a metavariable to jump to',
-          });
-
-          if (selected && selected.metavar.location) {
-            const location = selected.metavar.location;
-            const uri = Uri.parse(location.uri);
-            const position = new VSCodePosition(location.range.start.line, location.range.start.character);
-            const vscodePosition = new VSCodePosition(position.line, position.character);
-            const selection = new Selection(vscodePosition, vscodePosition);
-            const range = new Range(vscodePosition, vscodePosition);
-            const doc = await workspace.openTextDocument(uri);
-            await window.showTextDocument(doc);
-            editor.selection = selection;
-            editor.revealRange(range, 1);
-          }
-        } catch (error) {
-          window.showErrorMessage(`Error fetching metavars: ${error}`);
-        }
-      }
-    )
-  );
-
-}
-
-function inlineReplPreviewFor(res: string) {
-  const maxPreviewLength = 80;
-  const lines = res.split(/\r?\n/, 2);
-  const firstLine = lines[0];
-  const ellipsis = '…';
-  if (lines.length > 1) {
-    return firstLine.substring(0, maxPreviewLength) + ellipsis;
-  }
-  return firstLine.length > maxPreviewLength
-    ? firstLine.substring(0, maxPreviewLength) + ellipsis
-    : firstLine;
 }
 
 function sendExitCommandTo(server: NodeJS.WritableStream) {
@@ -284,9 +109,7 @@ function sendExitCommandTo(server: NodeJS.WritableStream) {
  * [LSP messages](https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/)
  * is discarded.
  *
- * This is necessary because the Idris 2 core writes error messages directly to stdout.
- *
- * @param source idris2-lsp stdout
+ * @param source massimult-lsp stdout
  */
 function sanitized(source: Readable, debugChannel: OutputChannel): NodeJS.ReadableStream {
   return Readable.from(sanitize(source, debugChannel));
